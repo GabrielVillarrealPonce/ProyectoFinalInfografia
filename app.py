@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import csv
 import copy
 import argparse
@@ -15,6 +13,8 @@ from utils import CvFpsCalc
 
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
+
+from ApiQuery import query_api
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -43,6 +43,8 @@ def main():
     print("Hand Gesture Recognition")
     # Argument parsing #################################################################
     args = get_args()
+
+    oracion = ""
 
     cap_device = args.device
     cap_width = args.width
@@ -168,12 +170,12 @@ def main():
                 # Drawing part
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_landmarks(debug_image, landmark_list)
-                debug_image = draw_info_text(
+                debug_image, oracion = draw_info_text(
                     debug_image,
                     brect,
                     handedness,
                     keypoint_classifier_labels[hand_sign_id],
-                    point_history_classifier_labels[most_common_fg_id[0][0]],
+                    point_history_classifier_labels[most_common_fg_id[0][0]], oracion
                 )
         else:
             point_history.append([0, 0])
@@ -297,7 +299,7 @@ def logging_csv(number, mode, landmark_list, point_history_list):
         csv_path = 'model/point_history_classifier/point_history.csv'
         with open(csv_path, 'a', newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([number, *point_history_list])
+            writer.writerow([number, *point_history_list]) 
     return
 
 
@@ -401,87 +403,87 @@ def draw_landmarks(image, landmark_point):
 
     # Key Points
     for index, landmark in enumerate(landmark_point):
-        if index == 0:  # 手首1
+        if index == 0:  # Wrist 1
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 1:  # 手首2
+        if index == 1:  # Wrist 2
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 2:  # 親指：付け根
+        if index == 2:  # Thumb: Base
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 3:  # 親指：第1関節
+        if index == 3:  # Thumb: First joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 4:  # 親指：指先
+        if index == 4:  # Thumb: Fingertip
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 5:  # 人差指：付け根
+        if index == 5:  # Index finger: Base
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 6:  # 人差指：第2関節
+        if index == 6:  # Index finger: Second joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 7:  # 人差指：第1関節
+        if index == 7:  # Index finger: First joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 8:  # 人差指：指先
+        if index == 8:  # Index finger: Fingertip
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 9:  # 中指：付け根
+        if index == 9:  # Middle finger: Base
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 10:  # 中指：第2関節
+        if index == 10:  # Middle finger: Second joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 11:  # 中指：第1関節
+        if index == 11:  # Middle finger: First joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 12:  # 中指：指先
+        if index == 12:  # Middle finger: Fingertip
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 13:  # 薬指：付け根
+        if index == 13:  # Ring finger: Base
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 14:  # 薬指：第2関節
+        if index == 14:  # Ring finger: Second joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 15:  # 薬指：第1関節
+        if index == 15:  # Ring finger: First joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 16:  # 薬指：指先
+        if index == 16:  # Ring finger: Fingertip
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 17:  # 小指：付け根
+        if index == 17:  # Little finger: Base
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 18:  # 小指：第2関節
+        if index == 18:  # Little finger: Second joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 19:  # 小指：第1関節
+        if index == 19:  # Little finger: First joint
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 20:  # 小指：指先
+        if index == 20:  # Little finger: Fingertip
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
@@ -498,7 +500,7 @@ def draw_bounding_rect(use_brect, image, brect):
     return image
 
 def draw_info_text(image, brect, handedness, hand_sign_text,
-                   finger_gesture_text):
+                   finger_gesture_text, oracion):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
                  (0, 0, 0), -1)
 
@@ -506,11 +508,19 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
     
     if hand_sign_text != "":
         info_text = info_text + ':' + hand_sign_text
-        if(len(oracion) > 0 and oracion[-1] != hand_sign_text):
-            oracion += hand_sign_text
+
+        if hand_sign_text == "X":
+            print("X")
+            #respuesta = query_api(oracion)
+            #print(respuesta)
+            oracion = ""
         else:
-            oracion = hand_sign_text
-        print(oracion)
+            if len(oracion) > 0:
+                if (oracion[-1] != hand_sign_text):
+                    oracion += hand_sign_text
+            else:
+                oracion = hand_sign_text
+            #print(oracion)
 
     cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
                cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
@@ -522,7 +532,7 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
     #                cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2,
     #                cv.LINE_AA)
 
-    return image
+    return image, oracion
 
 
 def draw_point_history(image, point_history):
